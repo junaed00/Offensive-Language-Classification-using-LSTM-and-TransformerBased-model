@@ -17,9 +17,6 @@ This project uses a multilingual dataset to detect offensive content in online f
 ---
 
 ###  1. `train.csv` – Labeled Training Data
-- **Language:** English only  
-- **Size:** ~23,000 rows  
-- **Columns:**
   - `id`: Unique identifier
   - `feedback_text`: The comment to classify
   - `toxic`: 1 if toxic
@@ -37,8 +34,6 @@ This project uses a multilingual dataset to detect offensive content in online f
 ---
 
 ###  2. `validation.csv` – Multilingual Validation Set
-- **Language:** Multilingual (e.g., `en`, `fr`, `tr`, etc.)
-- **Columns:**
   - `id`: Unique identifier
   - `feedback_text`: Feedback in multiple languages
   - `lang`: Language code
@@ -49,8 +44,6 @@ This project uses a multilingual dataset to detect offensive content in online f
 ---
 
 ### 3. `test.csv` – Multilingual Test Set (Unlabeled)
-- **Language:** Multilingual
-- **Columns:**
   - `id`: Unique identifier
   - `content`: Feedback to classify
   - `lang`: Language code
@@ -60,8 +53,6 @@ This project uses a multilingual dataset to detect offensive content in online f
 ---
 
 ### 4. `test_labels.csv` – Ground Truth for Test Set
-- **Size:** ~6,000 rows (subset of test set)  
-- **Columns:**
   - `id`: Matches `test.csv`
   - `toxic`: Binary ground truth (1 = offensive, 0 = not offensive)
 
@@ -83,9 +74,10 @@ This project uses a multilingual dataset to detect offensive content in online f
 **Note:**  
 The main prediction target is a **binary label** (offensive = 1 / not offensive = 0).  
 Fine-grained labels enrich training but are not directly evaluated.
+---
+---
 
-
-## Model Implementation Details
+# Model Implementation Details
 
 ### 1. Data Processing
 
@@ -141,18 +133,108 @@ Fine-grained labels enrich training but are not directly evaluated.
 
 - **Saved and reused** the fine-tuned model and tokenizer using `.save_pretrained()` and `.from_pretrained()` for efficiency.
 
----
 
-### Evaluation
-
-Each model was evaluated using:
-- Accuracy
-- Precision, Recall, F1-score
-- Confusion Matrix
-- AUC-ROC Curve
 
 Performance comparison and plots are included in both notebooks.
+---
+
+
+# Steps to Run
+
+Prefering to run the notebook/pipelines in **Google Colab** or Jupiter notebook:
 
 ---
-By,
-Mizbah Uddin Junaed
+
+### Choose a Notebook
+
+Navigate to the `task/` directory and open one of the following notebooks:
+
+- **`model1_implementation.ipynb`**: Logistic Regression and LSTM models.
+- **`model2_implementation.ipynb`**: Transformer-based model (BERT).
+
+---
+
+### Upload Dataset
+
+Upload the required files (`train.csv`, `validation.csv`, `test.csv`, `test_labels.csv`) to Google Drive (if using Colab) or your local directory.  
+ **Update file paths in the notebook** (e.g., `/content/drive/MyDrive/...`).
+
+---
+
+### Run the Notebook
+
+- In Colab: **Runtime → Run all**  
+- Locally: Run cells sequentially.
+
+This will process the data, train models (or load saved models), and display metrics.
+
+---
+
+### Use Saved Models (Optional)
+
+To save time, load pre-trained models. In this case, skip the model fiting codes.
+
+---
+
+The notebook will generate:
+
+- Classification Reports, Accuracy, AUC-ROC, Confusion Matrix, ROC Curves 
+
+---
+--- 
+
+# Model Evaluation Results
+
+### Some observations : 
+- **Class Imbalance:** The dataset is highly imbalanced — toxic labels are underrepresented. This affected the recall of simpler models.
+- **Multilingual Challenge:** Validation and test sets include comments in multiple languages, but the training set is mainly English. BERT’s multilingual design helped significantly here.
+- **Feature Engineering:** No custom preprocessing was needed for BERT. Traditional models required lemmatization, stopword removal, and TF-IDF.
+- **Training Time:** Logistic Regression was the fastest to train. LSTM required tuning. BERT was slowest but offered the best performance.
+- **Reusable Models:** All trained models were saved and can be reloaded for future inference without retraining.
+- **Visualization:** Confusion Matrices, ROC Curves, and Word Distributions were generated for better model interpretability.
+- **Generalization:** Fine-tuned BERT showed stable results even on unseen multilingual feedback, making it suitable for real-world deployment.
+
+This project evaluates three types of models for detecting offensive or toxic content:
+
+---
+
+### 1. Baseline Model: Logistic Regression (TF-IDF)
+
+- **Accuracy:** 0.770
+- **AUC-ROC:** 0.540
+- **Strengths:** Simple and fast; works well with clean and clearly separable text.
+- **Limitations:** Struggles with complex, multilingual, or context-dependent phrases. Poor minority class recall.
+
+---
+
+### 2. Advanced Model: LSTM (Tuned)
+
+- **Validation Accuracy:** 0.742
+- **Validation AUC-ROC:** 0.509
+
+- **Test Accuracy:** 0.718
+- **Test AUC-ROC:** 0.457
+
+- **Strengths:** Better sequence understanding than Logistic Regression. Able to model word order.
+- **Limitations:** Still struggles to capture nuanced toxicity in multilingual content. Takes longer to train.
+
+---
+
+### 3. Transformer-Based Model: Fine-tuned BERT
+
+- **Validation Accuracy:** 0.848
+- **Validation AUC-ROC:** 0.598
+- **Test Accuracy:** 0.793
+- **Test AUC-ROC:** 0.610
+
+- **Strengths:** Best performance across all metrics. Handles multilingual and context-aware inputs well.
+- **Limitations:** Requires more computational resources. Training is slower than traditional models.
+
+**Best Model:** BERT outperformed all other models, especially in detecting offensive content from multilingual inputs and edge cases. It is the most robust and generalizable solution for this task.
+
+---
+
+
+---
+
+Author : Mizbah Uddin Junaed
